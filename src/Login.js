@@ -1,9 +1,10 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 function Login(props) {
   return (
     <React.Fragment>
-      <a href="/">&lt;-- Go back</a>
+      <Link to="/">&lt;-- Go back</Link>
       <form onSubmit={props.handleSubmit}>
         <input
           placeholder="username"
