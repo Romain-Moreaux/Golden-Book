@@ -26,10 +26,7 @@ class App extends React.Component {
     loading: false,
     messages: [],
     submit: {},
-    user: {
-      username: Cookies.getJSON("username") || null,
-      token: Cookies.getJSON("token") || null
-    }
+    user: this.isLogged()
   };
 
   /*
@@ -82,44 +79,38 @@ class App extends React.Component {
         password: this.state.submit.password
       });
 
-      let refSubmit = { ...this.state.submit };
-      refSubmit = {};
-
-      // reference to this.state.user
-      let refUser = { ...this.state.user };
-      refUser = {
-        token: response.data.token,
-        username: response.data.username
-      };
-
       // Generate Cookies
       Cookies.set("token", response.data.token, { expires: 7 });
       Cookies.set("username", response.data.username, { expires: 7 });
 
       // Call SetState for re-Render
-      this.setState({ user: refUser, submit: refSubmit });
+      this.setState({
+        user: {
+          token: response.data.token,
+          username: response.data.username
+        },
+        submit: {}
+      });
     } catch (error) {
       console.log(error.message);
     }
   };
   /*
     @exec `API method`
-    @return `booleen`
+    @return `Object` or `null`
   */
   isLogged() {
-    const token = Cookies.get("token");
-    const username = Cookies.get("username");
+    const TOKEN = Cookies.getJSON("token");
+    const USERNAME = Cookies.getJSON("username");
 
-    if (token && username) return true;
-    else return false;
+    if (TOKEN && USERNAME) return { username: USERNAME, token: TOKEN };
+    else return null;
   }
 
   logOut() {
     Cookies.remove("token");
     Cookies.remove("username");
-    let refUser = { ...this.state.user };
-    refUser = {};
-    this.setState({ user: refUser });
+    this.setState({ user: {} });
   }
 
   /*
@@ -133,10 +124,7 @@ class App extends React.Component {
         { content: this.state.submit.message },
         { headers: { Authorization: "Bearer " + this.state.user.token } }
       );
-
-      let refSubmit = { ...this.state.submit };
-      refSubmit = {};
-      this.setState({ submit: refSubmit });
+      this.setState({ submit: {} });
     } catch (error) {
       console.log(error.message);
     }
@@ -160,11 +148,8 @@ class App extends React.Component {
   }
 
   render() {
-    let a = "dasdadada";
-    console.log(a);
-    console.log(typeof a);
+    console.log(this.state);
 
-    
     return (
       <Router>
         <div className="App">
@@ -199,7 +184,11 @@ class App extends React.Component {
                           }}
                         />
                         <p>
-                          Logged in as {this.state.user.username}&nbsp;
+                          Logged in as
+                          {this.state.user.username
+                            ? this.state.user.username
+                            : null}
+                          &nbsp;
                           <button
                             onClick={() => {
                               this.logOut();
